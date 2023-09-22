@@ -7,7 +7,7 @@ from cryptography.hazmat.backends import default_backend
 import os, sys
 def aes_encrypt():
     # Creating public key, then writing to key.txt
-    aes_key = os.urandom(16)
+    aes_key = os.urandom(16) # Needs to cycle between 16, 24, and 32 for changing the bit key
     with open("key.txt", "wb") as key_file:
         key_file.write(aes_key)
 
