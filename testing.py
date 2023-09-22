@@ -1,12 +1,9 @@
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding
 from cryptography.hazmat.primitives import padding as symmetric_padding
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
 import sys
 import os
+import time
 
 
 def create_aes_key(byte_size):
@@ -72,7 +69,7 @@ def testing_aes():
 
 if sys.argv[1] == '1':
     # create_aes_key(16)
-    aes_encrypt('MattSherrill', create_aes_key(16))
+    aes_encrypt('BrookandtheBluff', create_aes_key(16))
     aes_decrypt()
 # elif sys.argv[1] == 'c':
 #     create_rsa_key()
