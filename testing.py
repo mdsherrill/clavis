@@ -1,6 +1,9 @@
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding as symmetric_padding
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding
+from cryptography.hazmat.primitives import hashes
 import sys
 import os
 import time
@@ -64,6 +67,48 @@ def aes_decrypt():
     return unpadded_message
 
 
+def rsa_encrypt(public_key, message):
+    # Read Bob's public key from file
+    # with open('rsa_key.txt', 'rb') as key_file:
+    #     rsa_public_key = key_file.read()
+    message = message.encode()
+
+    # Create RSA Cipher
+    ciphertext = public_key.encrypt(
+        message,
+        asymmetric_padding.OAEP(
+            mgf=asymmetric_padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    # return ciphertext
+
+    with open("rsa_ciphertext.txt", 'wb') as key_file:
+        key_file.write(ciphertext)
+    # print("Encryption to file complete.\n\nDerived Ciphertext:",
+    #       ciphertext.hex())  # Convert to hexadecimal for easy printing
+
+
+def rsa_decrypt(private_key):
+    # Open the ciphertext file
+    with open("rsa_ciphertext.txt", 'rb') as ciph_text:
+        ciphertext = ciph_text.read()
+    # print("Received ciphertext: ", ciphertext.hex())
+
+    # Decrypt using ciphertext and private key
+    plaintext = private_key.decrypt(
+        ciphertext,
+        asymmetric_padding.OAEP(
+            mgf=asymmetric_padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    # print("Decryption complete.\n\nDeciphered Message: ", plaintext)
+
+
 def testing_aes_encrypt(message, bytesize):
     aes_key = create_aes_key(bytesize)
     total_time = 0.0
@@ -94,6 +139,41 @@ def testing_aes_decrypt(bytesize):
     print(f'Average Time for Decryption of {byte_size} bytes:', avg_time)
 
 
+def testing_rsa(message, bit_size):
+    # First to create the RSA keys
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,  # Always must be 65537 - Standard
+        key_size=bit_size,
+    )
+    public_key = private_key.public_key()
+
+    total_time = 0.0
+    for i in range(100):
+        start_time = time.time()
+
+        rsa_encrypt(public_key, message)
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        total_time += elapsed_time
+        # print(f"Elapsed time: {elapsed_time} seconds")
+    avg_time = total_time / 100
+    print(f'Average Time for Encryption of {bit_size} bytes:', avg_time)
+
+    total_time = 0.0
+    for i in range(100):
+        start_time = time.time()
+
+        rsa_decrypt(private_key)
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        total_time += elapsed_time
+        # print(f"Elapsed time: {elapsed_time} seconds")
+    avg_time = total_time / 100
+    print(f'Average Time for Decryption of {bit_size} bytes:', avg_time)
+
+
 if sys.argv[1] == '1':
     testing_aes_encrypt('BrookTB', 16)
     testing_aes_decrypt(16)
@@ -101,5 +181,9 @@ if sys.argv[1] == '1':
     testing_aes_decrypt(24)
     testing_aes_encrypt('BrookTB', 32)
     testing_aes_decrypt(32)
+elif sys.argv[1] == '2':
+    testing_rsa('BrookTB', 1024)
+    testing_rsa('BrookTB', 2048)
+    testing_rsa('BrookTB', 4096)
 else:
     exit()
