@@ -13,6 +13,7 @@ def create_aes_key(byte_size):
         key_file.write(aes_key)
     return aes_key
 
+
 def aes_encrypt(input_message, aes_key):
     iv = os.urandom(16)
     with open("ivtext.txt", "wb") as ivtext_file:
@@ -28,8 +29,7 @@ def aes_encrypt(input_message, aes_key):
     padded_message = padder.update(message) + padder.finalize()
 
     ciphertext = encryptor_text.update(padded_message) + encryptor_text.finalize()
-    print("Derived Ciphertext: ", ciphertext.hex())
-
+    # print("Derived Ciphertext: ", ciphertext.hex()) # No longer needed for calculations
     # Write the ciphertext to a file
     with open("ctext.txt", "wb") as ctext_file:
         ctext_file.write(ciphertext)
@@ -58,20 +58,48 @@ def aes_decrypt():
     unpadder = symmetric_padding.PKCS7(128).unpadder()
     unpadded_message = unpadder.update(decrypted_message) + unpadder.finalize()
 
-    # Print the decrypted message
-    print("Received Ciphertext:", ciphertext.hex())
-    print("Decrypted message:", unpadded_message.decode())
+    # Prints the decrypted message - not needed for calculations
+    # print("Received Ciphertext:", ciphertext.hex())
+    # print("Decrypted message:", unpadded_message.decode())
+    return unpadded_message
 
 
+def testing_aes_encrypt(message, bytesize):
+    aes_key = create_aes_key(bytesize)
+    total_time = 0.0
+    for i in range(100):
+        start_time = time.time()
 
-def testing_aes():
-    pass
+        aes_encrypt(message, aes_key)
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        total_time += elapsed_time
+        # print(f"Elapsed time: {elapsed_time} seconds")
+    avg_time = total_time / 100
+    byte_size = bytesize
+    print(f'Average Time for Encryption of {byte_size} bytes:', avg_time)
+
+
+def testing_aes_decrypt(bytesize):
+    total_time = 0.0
+    for i in range(100):
+        start_time = time.time()
+        aes_decrypt()
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        total_time += elapsed_time
+    avg_time = total_time / 100
+    byte_size = bytesize
+    print(f'Average Time for Decryption of {byte_size} bytes:', avg_time)
+
 
 if sys.argv[1] == '1':
-    # create_aes_key(16)
-    aes_encrypt('BrookandtheBluff', create_aes_key(16))
-    aes_decrypt()
-# elif sys.argv[1] == 'c':
-#     create_rsa_key()
-# elif sys.argv[1] == '2':
-#     rsa_decrypt()
+    testing_aes_encrypt('BrookTB', 16)
+    testing_aes_decrypt(16)
+    testing_aes_encrypt('BrookTB', 24)
+    testing_aes_decrypt(24)
+    testing_aes_encrypt('BrookTB', 32)
+    testing_aes_decrypt(32)
+else:
+    exit()
